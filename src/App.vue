@@ -15,9 +15,9 @@ onMounted(async () => {
     <div class="grid grid-cols-3 gap-4">
       <div v-for="{ id, gender, image, name, url } in data" :key="id">
         <img :src="image" :alt="name" />
-        {{ name }} <br />
-        {{ gender }} <br />
-        {{ url }}
+        <span class="text-xl text-neutral-600 block">{{ name }}</span>
+        <span class="text-neutral-400 block">{{ gender }}</span>
+        <a class="text-blue-400 underline block" :href="url"> Detalhes</a>
       </div>
     </div>
   </div>
