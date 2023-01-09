@@ -1,18 +1,61 @@
-# Vue 3 + TypeScript + Vite
+# Sharing common behavior (base HTTP class example)
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## <img src="./public/preview.png" />
 
-## Recommended IDE Setup
+---
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## HTTP Client example
 
-## Type Support For `.vue` Imports in TS
+```javascript
+import axios, { AxiosInstance } from 'axios';
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+export abstract class HttpClient {
+  protected baseUrl: string;
+  private axiosInstance: AxiosInstance | any = null;
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+    this.axiosInstance = axios.create({});
+    this.enableInterceptors();
+  }
+  enableInterceptors() {
+    // Here's where you can define common refetching logic
+  }
 
-1. Disable the built-in TypeScript Extension
-   1. Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-   2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+  protected get(url: string, params?: any, headers?: any): Promise<any> {
+    return this.axiosInstance({
+      method: 'GET',
+      url: `${this.baseUrl}${url}`,
+      params: params ? params : null,
+      headers: headers ? headers : null,
+    });
+  }
+
+  protected post(url: string, params?: any, headers?: any): Promise<any> {
+    return this.axiosInstance({
+      method: 'POST',
+      url: `${this.baseUrl}${url}`,
+      params: params ? params : null,
+      headers: headers ? headers : null,
+    });
+  }
+}
+
+```
+
+## Rick and Morty API Example
+
+```javascript
+import { HttpClient } from '../http';
+
+export class RickAndMortyApi extends HttpClient {
+  constructor() {
+    super('https://rickandmortyapi.com/api/character');
+  }
+
+  async getAllCharacters(): Promise<void> {
+    let response = await this.get('/');
+    return response.data.results;
+  }
+}
+```
